@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102b50">
+<title>Hatly Bank Installments</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f2f5f9;color:#17253b;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+header{background:linear-gradient(135deg,#102b50,#1c5485);color:white;padding:27px 20px 32px;border-radius:0 0 25px 25px}
+.brand{font-size:12px;letter-spacing:2px;opacity:.85}
+h1{font-size:25px;margin:9px 0}
+header p{margin:0;font-size:14px;opacity:.85}
+main{max-width:540px;margin:20px auto;padding:0 15px 35px}
+.card{background:white;padding:19px;border-radius:18px;margin-bottom:15px;box-shadow:0 4px 18px #17253b0b}
+label{display:block;font-size:14px;font-weight:650;margin:0 0 8px}
+input,select{width:100%;padding:14px;border:1px solid #d8e0ea;border-radius:11px;font-size:16px;background:#fff;color:#17253b;outline:none}
+input:focus,select:focus{border-color:#2465a4}
+.field{margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.term{padding:12px 3px;border:1px solid #d8e0ea;border-radius:10px;text-align:center;font-size:14px;background:white;color:#24364d}
+.term small{display:block;margin-top:5px;font-size:11px}
+.term.active{background:#e6f0ff;border:2px solid #2465a4;color:#164b85;font-weight:bold}
+.term:disabled{opacity:.35}
+.result{background:#102b50;color:white;border-radius:16px;padding:18px;margin-bottom:12px}
+.result .caption{font-size:13px;color:#d3dfef}
+.amount{font-size:27px;font-weight:750;margin:8px 0}
+.subresult{display:flex;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid #e8edf3;font-size:14px}
+.subresult:last-child{border-bottom:0}
+.subresult strong{text-align:left}
+button{cursor:pointer}
+.copy{width:100%;border:0;border-radius:12px;padding:15px;background:#24714d;color:white;font-size:16px;font-weight:bold}
+.note{font-size:12px;color:#66758a;line-height:1.7;margin:14px 2px}
+footer{text-align:center;color:#8290a2;font-size:12px;padding:5px 0 20px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">HATLY STORE</div>
+  <h1>Hatly Bank Installments</h1>
+  <p>حاسبة تقسيط البنوك</p>
+</header>
+<main>
+  <section class="card">
+    <div class="field">
+      <label for="price">سعر الجهاز بالجنيه</label>
+      <input id="price" type="number" min="0" step="any" value="30000" inputmode="decimal">
+    </div>
+    <div class="field">
+      <label for="bank">اختار البنك</label>
+      <select id="bank"></select>
+    </div>
+    <label>مدة التقسيط ونسبة الزيادة</label>
+    <div class="grid" id="terms"></div>
+  </section>
+
+  <section class="card">
+    <div class="result">
+      <div class="caption">هتدفع بالكريدت كارد</div>
+      <div class="amount" id="total">— جنيه</div>
+      <div class="caption">شامل نسبة زيادة البنك</div>
+    </div>
+    <div class="subresult"><span>سعر الجهاز</span><strong id="original">—</strong></div>
+    <div class="subresult"><span>نسبة الزيادة</span><strong id="rate">—</strong></div>
+    <div class="subresult"><span>قيمة الزيادة</span><strong id="increase">—</strong></div>
+    <div class="subresult"><span>مدة التقسيط</span><strong id="duration">—</strong></div>
+    <div class="subresult"><span>القسط الشهري (هتدفع للبنك)</span><strong id="monthly">—</strong></div>
+    <button class="copy" id="copy" style="margin-top:18px">نسخ تفاصيل التقسيط</button>
+    <div class="note">الحساب حسب نسب جدول البنوك المُدخل. تأكد من النسبة النهائية مع البنك قبل تأكيد التقسيط.</div>
+  </section>
+  <footer>Hatly Store © 2026</footer>
+</main>
+
+<script>
+const banks = [
+["البنك الأهلي المصري - NBE",{"3":6.95,"6":11.17,"9":15.53,"12":20.05,"18":29.51,"24":39.59,"36":61.74}],
+["بنك مصر - Banque Misr",{"6":17.46,"12":27.48,"18":39.40}],
+["بنك الكويت الوطني - NBK",{"3":10.24,"6":11.61,"12":19.02,"18":27.48,"24":35.19,"36":65.21}],
+["بنك أبوظبي الأول - FAB",{"6":14.17,"12":26.22,"18":42.07,"24":63.09,"36":101.50}],
+["بنك الإمارات دبي الوطني - ENBD",{"6":10.24,"12":18.23,"18":24.82,"24":35.19}],
+["بنك أبوظبي الإسلامي - ADIB",{"3":7.60,"6":10.24,"9":15.20,"12":19.02,"18":27.48,"24":37.26,"36":57.89}],
+["التجاري وفا بنك - Attijariwafa",{"6":10.24,"12":20.62,"18":35.19,"24":51.20}],
+["بنك المشرق - El Mashreq",{"3":18.23,"6":23.95,"9":31.22,"12":36.22}],
+["بيت التمويل الكويتي - KFH",{"3":7.60,"6":13.02,"9":19.02,"12":24.82,"18":39.40,"24":53.81}],
+["بنك NXT",{"3":5.71,"6":10.24,"12":19.81,"18":27.48,"24":36.22,"36":56.51}]
+];
+const $=id=>document.getElementById(id);
+const fmt=n=>n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+let selectedMonths="12";
+banks.forEach((b,i)=>{
+ const o=document.createElement("option");
+ o.value=i;o.textContent=b[0];$("bank").appendChild(o);
+});
+$("bank").value="5";
+function renderTerms(){
+ const rates=banks[+$("bank").value][1];
+ $("terms").innerHTML="";
+ Object.keys({"3":1,"6":1,"9":1,"12":1,"18":1,"24":1,"36":1}).forEach(m=>{
+  const btn=document.createElement("button");
+  btn.type="button";btn.className="term";
+  btn.disabled=rates[m]===undefined;
+  btn.innerHTML=m+" شهر"+(rates[m]===undefined?"<small>غير متاح</small>":"<small>"+rates[m].toFixed(2)+"%</small>");
+  if(m===selectedMonths&&!btn.disabled)btn.classList.add("active");
+  btn.onclick=()=>{selectedMonths=m;renderTerms();calculate()};
+  $("terms").appendChild(btn);
+ });
+ if(rates[selectedMonths]===undefined){
+  selectedMonths=Object.keys(rates)[0];
+  renderTerms();
+ }
+}
+function calculate(){
+ const price=Math.max(0,Number($("price").value)||0);
+ const rate=banks[+$("bank").value][1][selectedMonths];
+ const total=price*(1+rate/100);
+ $("original").textContent=fmt(price)+" جنيه";
+ $("rate").textContent=rate.toFixed(2)+"%";
+ $("increase").textContent=fmt(total-price)+" جنيه";
+ $("duration").textContent=selectedMonths+" شهر";
+ $("total").textContent=fmt(total)+" جنيه";
+ $("monthly").textContent=fmt(total/Number(selectedMonths))+" جنيه";
+}
+$("bank").addEventListener("change",()=>{renderTerms();calculate()});
+$("price").addEventListener("input",calculate);
+$("copy").addEventListener("click",async()=>{
+ const text=`Hatly Bank Installments
+سعر الجهاز: ${$("original").textContent}
+البنك: ${banks[+$("bank").value][0]}
+المدة: ${selectedMonths} شهر
+نسبة الزيادة: ${$("rate").textContent}
+هتدفع بالكريدت كارد: ${$("total").textContent}
+القسط الشهري (هتدفع للبنك): ${$("monthly").textContent}`;
+ try{
+  if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(text);
+  else {const t=document.createElement("textarea");t.value=text;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove()}
+  $("copy").textContent="تم نسخ التفاصيل";
+  setTimeout(()=>$("copy").textContent="نسخ تفاصيل التقسيط",1800);
+ }catch(e){alert(text)}
+});
+renderTerms();
+calculate();
+</script>
+</body>
+</html>
